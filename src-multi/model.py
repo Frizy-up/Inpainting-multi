@@ -111,7 +111,11 @@ class Model():
         batch_size = images.get_shape().as_list()[0]
 
         with tf.variable_scope('GEN'):
-            conv1 = self.new_conv_layer(images, [4,4,3,64], stride=2, name="conv1" )
+
+            # Frizy changed: input channel is 3-->12
+            # conv1 = self.new_conv_layer(images, [4,4,3,64], stride=2, name="conv1" )
+            conv1 = self.new_conv_layer(images, [4, 4, 12, 64], stride=2, name="conv1")
+
             bn1 = self.leaky_relu(self.batchnorm(conv1, is_train, name='bn1'))
             conv2 = self.new_conv_layer(bn1, [4,4,64,64], stride=2, name="conv2" )
             bn2 = self.leaky_relu(self.batchnorm(conv2, is_train, name='bn2'))

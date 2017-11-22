@@ -78,7 +78,7 @@ class Model():
         return tf.maximum(leak*bottom, bottom)
 
     def batchnorm(self, bottom, is_train, epsilon=1e-8, name=None):
-        bottom = tf.clip_by_value( bottom, -100., 100.)
+        # bottom = tf.clip_by_value( bottom, -100., 100.)
         # depth = bottom.get_shape().as_list()[-1]
 
         # with tf.variable_scope(name):
@@ -111,7 +111,16 @@ class Model():
         batch_size = images.get_shape().as_list()[0]
 
         with tf.variable_scope('GEN'):
-            conv1 = self.new_conv_layer(images, [4,4,3,64], stride=2, name="conv1" )
+            # Frizy added : for 256->128
+            conv1_add1 = self.new_conv_layer(images, [4, 4, 3, 32], stride=2, name="conv1_add1")
+            bn1_add1 = self.leaky_relu(self.batchnorm(conv1_add1, is_train, name='bn1_add1'))
+
+            # conv1_add2 = self.new_conv_layer(bn1_add1, [4, 4, 16, 32], stride=2, name="conv1_add2")
+            # bn1_add2 = self.leaky_relu(self.batchnorm(conv1_add2, is_train, name='bn1_add2'))
+
+            # conv1 = self.new_conv_layer(images, [4,4,3,64], stride=2, name="conv1" )
+            conv1 = self.new_conv_layer(bn1_add1, [4, 4, 32, 64], stride=2, name="conv1")
+
             bn1 = self.leaky_relu(self.batchnorm(conv1, is_train, name='bn1'))
             conv2 = self.new_conv_layer(bn1, [4,4,64,64], stride=2, name="conv2" )
             bn2 = self.leaky_relu(self.batchnorm(conv2, is_train, name='bn2'))
@@ -137,7 +146,6 @@ class Model():
         return bn1, bn2, bn3, bn4, bn5, bn6, debn4, debn3, debn2, debn1, recon, tf.nn.tanh(recon)
 
     def build_adversarial(self, images, is_train, reuse=None):
-        # Frizy: added follow line:
         with tf.variable_scope('DIS', reuse=reuse):
             conv1 = self.new_conv_layer(images, [4,4,3,64], stride=2, name="conv1" )
             bn1 = self.leaky_relu(self.batchnorm(conv1, is_train, name='bn1'))

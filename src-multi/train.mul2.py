@@ -21,14 +21,14 @@ lambda_adv = 0.001
 overlap_size = 7
 hiding_size = 64
 
-trainset_path = '../data/paris_trainset.pickle'
-testset_path  = '../data/paris_testset.pickle'
+trainset_path = '../data/single_trainset.pickle'
+testset_path  = '../data/single_testset.pickle'
 #dataset_path = '/media/storage3/Study/data/Paris/'
-dataset_path = '/home/lab/PycharmProjects/Inpainting/DataSet/Paris/'
+dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Single/'
 
-model_path = '../models/Paris3/'
-result_path= '../results/Paris3/'
-pretrained_model_path = '../models/Paris2/model-2490'
+model_path = '../models/Single/'
+result_path= '../results/Single/'
+pretrained_model_path =None # '../models/Single/.0'
 
 if not os.path.exists(model_path):
     os.makedirs( model_path )
@@ -38,8 +38,8 @@ if not os.path.exists(result_path):
 
 if not os.path.exists( trainset_path ) or not os.path.exists( testset_path ):
 
-    trainset_dir = os.path.join( dataset_path, 'paris_train_original' )
-    testset_dir = os.path.join( dataset_path, 'paris_eval_gt' )
+    trainset_dir = os.path.join( dataset_path, 'trainData' )
+    testset_dir = os.path.join( dataset_path, 'testData' )
 
     trainset = pd.DataFrame({'image_path': map(lambda x: os.path.join( trainset_dir, x ), os.listdir(trainset_dir))})
     testset = pd.DataFrame({'image_path': map(lambda x: os.path.join( testset_dir, x ), os.listdir(testset_dir))})
@@ -54,7 +54,10 @@ testset.index = range(len(testset))
 is_train = tf.placeholder( tf.bool, shape=None )
 
 learning_rate = tf.placeholder( tf.float32, [])
-images_tf = tf.placeholder( tf.float32, [batch_size, 128, 128, 3], name="images")
+
+# Frizy added : input
+# images_tf = tf.placeholder( tf.float32, [batch_size, 128, 128, 3], name="images")
+images_tf = tf.placeholder( tf.float32, [batch_size, 300, 300, 12], name="images")
 
 images_hiding = tf.placeholder( tf.float32, [batch_size, hiding_size, hiding_size, 3], name='images_hiding')
 

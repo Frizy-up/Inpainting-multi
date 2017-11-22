@@ -7,8 +7,10 @@ import os
 import numpy as np
 
 #def load_image( path, height=128, width=128 ):
-def load_image( path, pre_height=146, pre_width=146, height=128, width=128 ):
 
+# Frizy changed : load image 128-->512
+# def load_image( path, pre_height=146, pre_width=146, height=128, width=128 ):
+def load_image( path, pre_height=274, pre_width=274, height=256, width=256 ):
     try:
         img = skimage.io.imread( path ).astype( float )
     except:
@@ -23,11 +25,13 @@ def load_image( path, pre_height=146, pre_width=146, height=128, width=128 ):
     if img.shape[2] == 4: img=img[:,:,:3]
     if img.shape[2] > 4: return None
 
-    short_edge = min( img.shape[:2] )
-    yy = int((img.shape[0] - short_edge) / 2)
-    xx = int((img.shape[1] - short_edge) / 2)
-    crop_img = img[yy:yy+short_edge, xx:xx+short_edge]
-    resized_img = skimage.transform.resize( crop_img, [pre_height,pre_width] )
+    # Frizy changed
+    # short_edge = min( img.shape[:2] )
+    # yy = int((img.shape[0] - short_edge) / 2)
+    # xx = int((img.shape[1] - short_edge) / 2)
+    # crop_img = img[yy:yy+short_edge, xx:xx+short_edge]
+    # resized_img = skimage.transform.resize( crop_img, [pre_height,pre_width] )
+    resized_img = skimage.transform.resize(img, [pre_height, pre_width])
 
     rand_y = np.random.randint(0, pre_height - height)
     rand_x = np.random.randint(0, pre_width - width)
@@ -36,10 +40,12 @@ def load_image( path, pre_height=146, pre_width=146, height=128, width=128 ):
 
     return (resized_img * 2)-1 #(resized_img - 127.5)/127.5
 
+
+# Frizy changed: width , height
 def crop_random(image_ori, width=64,height=64, x=None, y=None, overlap=7):
     if image_ori is None: return None
-    random_y = np.random.randint(overlap,height-overlap) if x is None else x
-    random_x = np.random.randint(overlap,width-overlap) if y is None else y
+    random_y = np.random.randint(overlap, height-overlap) if x is None else x
+    random_x = np.random.randint(overlap, width-overlap) if y is None else y
 
     image = image_ori.copy()
     crop = image_ori.copy()

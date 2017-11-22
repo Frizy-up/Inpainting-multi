@@ -10,9 +10,16 @@ import cv2
 from model import *
 from util import *
 
+
 n_epochs = 10000
-learning_rate_val = 0.0002
-weight_decay_rate =  0.0001
+# Frizy changed: 0.0002->0.002
+# learning_rate_val = 0.0002
+learning_rate_val = 0.002
+
+# Frizy changed: 0.0001->0.001
+# weight_decay_rate =  0.0001
+weight_decay_rate =  0.001
+
 momentum = 0.9
 batch_size = 100
 lambda_recon = 0.999
@@ -21,14 +28,19 @@ lambda_adv = 0.001
 overlap_size = 7
 hiding_size = 64
 
-trainset_path = '../data/single_trainset.pickle'
-testset_path  = '../data/single_testset.pickle'
+# Frizy add: fill
+resultDim = 256
+fill_one_side = (resultDim-hiding_size)/2
+
+
+trainset_path = '../data/SingleData/single_trainset.pickle'
+testset_path  = '../data/SingleData/single_testset.pickle'
 #dataset_path = '/media/storage3/Study/data/Paris/'
-dataset_path = '../DataSet/Paris/'
+dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Single/'
 
 model_path = '../models/Single/'
 result_path= '../results/Single/'
-pretrained_model_path = '../models/Paris2/model-2490'
+pretrained_model_path =None # '../models/Single/model-2490'
 
 if not os.path.exists(model_path):
     os.makedirs( model_path )
@@ -38,8 +50,8 @@ if not os.path.exists(result_path):
 
 if not os.path.exists( trainset_path ) or not os.path.exists( testset_path ):
 
-    trainset_dir = os.path.join( dataset_path, 'paris_train_original' )
-    testset_dir = os.path.join( dataset_path, 'paris_eval_gt' )
+    trainset_dir = os.path.join( dataset_path, 'trainData' )
+    testset_dir = os.path.join( dataset_path, 'testData' )
 
     trainset = pd.DataFrame({'image_path': map(lambda x: os.path.join( trainset_dir, x ), os.listdir(trainset_dir))})
     testset = pd.DataFrame({'image_path': map(lambda x: os.path.join( testset_dir, x ), os.listdir(testset_dir))})
@@ -54,7 +66,10 @@ testset.index = range(len(testset))
 is_train = tf.placeholder( tf.bool, shape=None )
 
 learning_rate = tf.placeholder( tf.float32, [])
-images_tf = tf.placeholder( tf.float32, [batch_size, 128, 128, 3], name="images")
+
+# Frizy changed : input image 128-->
+# images_tf = tf.placeholder( tf.float32, [batch_size, 128, 128, 3], name="images")
+images_tf = tf.placeholder( tf.float32, [batch_size, resultDim, resultDim, 3], name="images")
 
 images_hiding = tf.placeholder( tf.float32, [batch_size, hiding_size, hiding_size, 3], name='images_hiding')
 
@@ -115,7 +130,7 @@ tf.initialize_all_variables().run()
 
 #if pretrained_model_path is not None and os.path.exists( pretrained_model_path ):
 #    saver.restore( sess, pretrained_model_path )
-saver.restore( sess, pretrained_model_path )
+# saver.restore( sess, pretrained_model_path )
 
 iters = 0
 
@@ -131,7 +146,7 @@ for epoch in range(n_epochs):
             range(batch_size, len(trainset), batch_size)):
 
         image_paths = trainset[start:end]['image_path'].values
-        images_ori = map(lambda x: load_image( x ), image_paths)
+        images_ori = map(lambda x: load_image( x, height=resultDim,width=resultDim), image_paths)
 
         if iters % 2 == 0:
             images_ori = map(lambda img: img[:,::-1,:], images_ori)
@@ -139,15 +154,19 @@ for epoch in range(n_epochs):
         is_none = np.sum(map(lambda x: x is None, images_ori))
         if is_none > 0: continue
 
-        images_crops = map(lambda x: crop_random(x, x=32, y=32), images_ori)
+        # Frizy
+        # images_crops = map(lambda x: crop_random(x, x=32, y=32), images_ori)
+        images_crops = map(lambda x: crop_random(x, x=fill_one_side, y=fill_one_side), images_ori)
         images, crops,_,_ = zip(*images_crops)
 
         # Printing activations every 10 iterations
         if iters % 100 == 0:
             test_image_paths = testset[:batch_size]['image_path'].values
-            test_images_ori = map(lambda x: load_image(x), test_image_paths)
+            test_images_ori = map(lambda x: load_image(x,height=resultDim, width=resultDim), test_image_paths)
 
-            test_images_crop = map(lambda x: crop_random(x, x=32, y=32), test_images_ori)
+            # Frizy
+            # test_images_crop = map(lambda x: crop_random(x, x=32, y=32), test_images_ori)
+            test_images_crop = map(lambda x: crop_random(x, width=hiding_size, height=hiding_size, x=fill_one_side, y=fill_one_side), test_images_ori)
             test_images, test_crops, xs,ys = zip(*test_images_crop)
 
             reconstruction_vals, adv_pos_val, adv_neg_val, recon_ori_vals, bn1_val,bn2_val,bn3_val,bn4_val,bn5_val,bn6_val,debn4_val, debn3_val, debn2_val, debn1_val, loss_G_val, loss_D_val = sess.run(
@@ -159,7 +178,7 @@ for epoch in range(n_epochs):
                         })
 
             # Generate result every 1000 iterations
-            if iters % 500 == 0:
+            if iters % 100 == 0:
                 ii = 0
                 for rec_val, img,x,y in zip(reconstruction_vals, test_images, xs, ys):
                     rec_hid = (255. * (rec_val+1)/2.).astype(int)
@@ -173,7 +192,10 @@ for epoch in range(n_epochs):
                     ii = 0
                     for test_image in test_images_ori:
                         test_image = (255. * (test_image+1)/2.).astype(int)
-                        test_image[32:32+64,32:32+64] = 0
+
+                        # Frizy changed
+                        # test_image[32:32+64,32:32+64] = 0
+                        test_image[fill_one_side:fill_one_side + hiding_size, fill_one_side:fill_one_side + hiding_size] = 0
                         cv2.imwrite( os.path.join(result_path, 'img_'+str(ii)+'.ori.jpg'), test_image)
                         ii += 1
 
