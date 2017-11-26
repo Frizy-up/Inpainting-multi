@@ -148,8 +148,8 @@ for epoch in range(n_epochs):
         image_paths = trainset[start:end]['image_path'].values
         images_ori = map(lambda x: load_image( x, height=resultDim,width=resultDim), image_paths)
 
-        if iters % 2 == 0:
-            images_ori = map(lambda img: img[:,::-1,:], images_ori)
+        # if iters % 2 == 0:
+        #     images_ori = map(lambda img: img[:,::-1,:], images_ori)
 
         is_none = np.sum(map(lambda x: x is None, images_ori))
         if is_none > 0: continue
@@ -181,28 +181,22 @@ for epoch in range(n_epochs):
             if iters % 300 == 0:
                 ii = 0
                 for rec_val, img,x,y in zip(reconstruction_vals, test_images, xs, ys):
-                    # Frizy changed
-                    # rec_hid = (255. * (rec_val+1)/2.).astype(int)
-                    # rec_con = (255. * (img+1)/2.).astype(int)
-                    rec_hid = (255. * rec_val ).astype(int)
-                    rec_con = (255. * img ).astype(int)
+                    rec_hid = (255. * (rec_val+1)/2.).astype(int)
+                    rec_con = (255. * (img+1)/2.).astype(int)
 
                     rec_con[y:y+64, x:x+64] = rec_hid
-                    cv2.imwrite( os.path.join(result_path, 'img_'+str(ii)+'.'+str(int(iters/100))+'.jpg'), rec_con)
+                    cv2.imwrite( os.path.join(result_path, 'img_'+str(ii)+'.'+str(int(iters/100))+'.png'), rec_con)
                     ii += 1
 
                 if iters == 0:
                     ii = 0
                     for test_image in test_images_ori:
-
-                        # Frizy changed
-                        # test_image = (255. * (test_image+1)/2.).astype(int)
-                        test_image = (255. * test_image ).astype(int)
+                        test_image = (255. * (test_image+1)/2.).astype(int)
 
                         # Frizy changed
                         # test_image[32:32+64,32:32+64] = 0
                         test_image[fill_one_side:fill_one_side + hiding_size, fill_one_side:fill_one_side + hiding_size] = 0
-                        cv2.imwrite( os.path.join(result_path, 'img_'+str(ii)+'.ori.jpg'), test_image)
+                        cv2.imwrite( os.path.join(result_path, 'img_'+str(ii)+'.ori.png'), test_image)
                         ii += 1
 
             # ipdb.set_trace()
