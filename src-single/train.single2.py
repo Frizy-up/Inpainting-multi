@@ -36,7 +36,7 @@ fill_one_side = (resultDim-hiding_size)/2
 trainset_path = '../data/SingleData/single_trainset.pickle'
 testset_path  = '../data/SingleData/single_testset.pickle'
 #dataset_path = '/media/storage3/Study/data/Paris/'
-dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Single/'
+dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Mul/'
 
 model_path = '../models/Single/'
 result_path= '../results/Single/'
@@ -50,8 +50,8 @@ if not os.path.exists(result_path):
 
 if not os.path.exists( trainset_path ) or not os.path.exists( testset_path ):
 
-    trainset_dir = os.path.join( dataset_path, 'trainData' )
-    testset_dir = os.path.join( dataset_path, 'testData' )
+    trainset_dir = os.path.join( dataset_path, 'trainData/Left' )
+    testset_dir = os.path.join( dataset_path, 'testData/Left' )
 
     trainset = pd.DataFrame({'image_path': map(lambda x: os.path.join( trainset_dir, x ), os.listdir(trainset_dir))})
     testset = pd.DataFrame({'image_path': map(lambda x: os.path.join( testset_dir, x ), os.listdir(testset_dir))})
@@ -181,8 +181,11 @@ for epoch in range(n_epochs):
             if iters % 300 == 0:
                 ii = 0
                 for rec_val, img,x,y in zip(reconstruction_vals, test_images, xs, ys):
-                    rec_hid = (255. * (rec_val+1)/2.).astype(int)
-                    rec_con = (255. * (img+1)/2.).astype(int)
+                    # Frizy changed
+                    # rec_hid = (255. * (rec_val+1)/2.).astype(int)
+                    # rec_con = (255. * (img+1)/2.).astype(int)
+                    rec_hid = (255. * rec_val ).astype(int)
+                    rec_con = (255. * img ).astype(int)
 
                     rec_con[y:y+64, x:x+64] = rec_hid
                     cv2.imwrite( os.path.join(result_path, 'img_'+str(ii)+'.'+str(int(iters/100))+'.jpg'), rec_con)
@@ -191,7 +194,10 @@ for epoch in range(n_epochs):
                 if iters == 0:
                     ii = 0
                     for test_image in test_images_ori:
-                        test_image = (255. * (test_image+1)/2.).astype(int)
+
+                        # Frizy changed
+                        # test_image = (255. * (test_image+1)/2.).astype(int)
+                        test_image = (255. * test_image ).astype(int)
 
                         # Frizy changed
                         # test_image[32:32+64,32:32+64] = 0
@@ -248,7 +254,7 @@ for epoch in range(n_epochs):
         iters += 1
 
 
-    if epoch % 500 == 0:
+    if epoch % 200 == 0:
         saver.save(sess, model_path + 'model', global_step=epoch)
         learning_rate_val *= 0.99
         print "cur_learning_rate:", learning_rate_val

@@ -38,7 +38,9 @@ def load_image( path, pre_height=274, pre_width=274, height=256, width=256 ):
 
     resized_img = resized_img[ rand_y:rand_y+height, rand_x:rand_x+width, : ]
 
-    return (resized_img * 2)-1 #(resized_img - 127.5)/127.5
+    # Frizy changed
+    # return (resized_img * 2)-1 #(resized_img - 127.5)/127.5
+    return resized_img
 
 
 # Frizy changed: width , height
