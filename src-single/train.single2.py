@@ -11,7 +11,7 @@ from model import *
 from util import *
 
 
-n_epochs = 10000
+n_epochs = 100000
 # Frizy changed: 0.0002->0.002
 # learning_rate_val = 0.0002
 learning_rate_val = 0.002
@@ -178,7 +178,7 @@ for epoch in range(n_epochs):
                         })
 
             # Generate result every 1000 iterations
-            if iters % 100 == 0:
+            if iters % 300 == 0:
                 ii = 0
                 for rec_val, img,x,y in zip(reconstruction_vals, test_images, xs, ys):
                     rec_hid = (255. * (rec_val+1)/2.).astype(int)
@@ -238,18 +238,20 @@ for epoch in range(n_epochs):
                 feed_dict={
                     images_tf: images,
                     images_hiding: crops,
-                    learning_rate: learning_rate_val/10.,
+                    learning_rate: learning_rate_val/100.,
                     is_train: True
                     })
 
         print "Iter:", iters, "Gen Loss:", loss_G_val, "Recon Loss:", loss_recon_val, "Gen ADV Loss:", loss_adv_val,  "Dis Loss:", loss_D_val, "||||", adv_pos_val.mean(), adv_neg_val.min(), adv_neg_val.max()
+        print "cur_learning_rate:", learning_rate_val
 
         iters += 1
 
 
-    if epoch % 10 == 0:
+    if epoch % 500 == 0:
         saver.save(sess, model_path + 'model', global_step=epoch)
         learning_rate_val *= 0.99
+        print "cur_learning_rate:", learning_rate_val
 
 
 
