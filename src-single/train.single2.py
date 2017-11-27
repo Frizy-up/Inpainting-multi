@@ -40,7 +40,7 @@ dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Mul/'
 
 model_path = '../models/Single/'
 result_path= '../results/Single/'
-pretrained_model_path =None # '../models/Single/model-2490'
+pretrained_model_path = None #'../models/Single-old/model-800'
 
 if not os.path.exists(model_path):
     os.makedirs( model_path )
@@ -54,7 +54,10 @@ if not os.path.exists( trainset_path ) or not os.path.exists( testset_path ):
     testset_dir = os.path.join( dataset_path, 'testData/Left' )
 
     trainset = pd.DataFrame({'image_path': map(lambda x: os.path.join( trainset_dir, x ), os.listdir(trainset_dir))})
-    testset = pd.DataFrame({'image_path': map(lambda x: os.path.join( testset_dir, x ), os.listdir(testset_dir))})
+
+    test_image_list = map(lambda x: os.path.join(testset_dir, x), os.listdir(testset_dir))
+    test_image_list.sort()
+    testset = pd.DataFrame({'image_path': test_image_list})
 
     trainset.to_pickle( trainset_path )
     testset.to_pickle( testset_path )
@@ -130,7 +133,7 @@ tf.initialize_all_variables().run()
 
 #if pretrained_model_path is not None and os.path.exists( pretrained_model_path ):
 #    saver.restore( sess, pretrained_model_path )
-# saver.restore( sess, pretrained_model_path )
+saver.restore( sess, pretrained_model_path )
 
 iters = 0
 
@@ -148,8 +151,8 @@ for epoch in range(n_epochs):
         image_paths = trainset[start:end]['image_path'].values
         images_ori = map(lambda x: load_image( x, height=resultDim,width=resultDim), image_paths)
 
-        # if iters % 2 == 0:
-        #     images_ori = map(lambda img: img[:,::-1,:], images_ori)
+        if iters % 2 == 0:
+            images_ori = map(lambda img: img[:,::-1,:], images_ori)
 
         is_none = np.sum(map(lambda x: x is None, images_ori))
         if is_none > 0: continue
