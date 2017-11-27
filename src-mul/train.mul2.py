@@ -23,8 +23,8 @@ weight_decay_rate =  0.001
 momentum = 0.9
 
 # Frizy
-# batch_size = 100
-batch_size = 3
+batch_size = 100
+# batch_size = 3
 
 lambda_recon = 0.999
 lambda_adv = 0.001
@@ -40,7 +40,7 @@ fill_one_side = (resultDim-hiding_size)/2
 trainset_path = '../data/MulData/mul_trainset.pickle'
 testset_path  = '../data/MulData/mul_testset.pickle'
 #dataset_path = '/media/storage3/Study/data/Paris/'
-dataset_path = '/home/frizy/PycharmProjects/Inpainting-multi/DataSet/'
+dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Mul/'
 
 model_path = '../models/Mul/'
 result_path= '../results/Mul/'
@@ -192,7 +192,7 @@ for epoch in range(n_epochs):
         images_all, crops,_,_ = zip(*images_allAndcrops)
 
         # Printing activations every 10 iterations
-        if iters % 100 == 0:
+        if iters % 300 == 0:
             test_image_paths_left = testset[:batch_size]['image_path_left'].values
             test_image_paths_right = testset[:batch_size]['image_path_right'].values
             test_images_ori_all = map(lambda left,right: load_image_mul(left,right,height=resultDim, width=resultDim),
@@ -282,7 +282,7 @@ for epoch in range(n_epochs):
         iters += 1
 
 
-    if epoch % 200 == 0:
+    if epoch != 0 and epoch % 150 == 0:
         saver.save(sess, model_path + 'model', global_step=epoch)
         learning_rate_val *= 0.99
         print "cur_learning_rate:", learning_rate_val
