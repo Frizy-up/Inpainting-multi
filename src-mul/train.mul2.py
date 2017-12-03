@@ -14,7 +14,8 @@ from util import *
 n_epochs = 100000
 # Frizy changed: 0.0002->0.002
 # learning_rate_val = 0.0002
-learning_rate_val = 0.002
+# learning_rate_val = 0.002
+learning_rate_val = 0.00148
 
 # Frizy changed: 0.0001->0.001
 # weight_decay_rate =  0.0001
@@ -44,7 +45,7 @@ dataset_path = '/home/lab/Program-opt/MultiCamera/DataSet-Mul/'
 
 model_path = '../models/Mul/'
 result_path= '../results/Mul/'
-pretrained_model_path =None # '../models/Single/model-2490'
+pretrained_model_path = None # '/home/lab/PycharmProjects/Inpainting-multi/models/Mul-old/model-150'
 
 if not os.path.exists(model_path):
     os.makedirs( model_path )
@@ -282,10 +283,13 @@ for epoch in range(n_epochs):
         iters += 1
 
 
-    if epoch != 0 and epoch % 150 == 0:
+    if epoch != 0 and epoch % 100 == 0:
         saver.save(sess, model_path + 'model', global_step=epoch)
         learning_rate_val *= 0.99
         print "cur_learning_rate:", learning_rate_val
+
+    if epoch != 0 and epoch % 10 == 0:
+        saver.save(sess, model_path + 'model', global_step=epoch)
 
 
 

@@ -133,7 +133,7 @@ tf.initialize_all_variables().run()
 
 #if pretrained_model_path is not None and os.path.exists( pretrained_model_path ):
 #    saver.restore( sess, pretrained_model_path )
-saver.restore( sess, pretrained_model_path )
+# saver.restore( sess, pretrained_model_path )
 
 iters = 0
 
@@ -251,8 +251,10 @@ for epoch in range(n_epochs):
         iters += 1
 
 
-    if epoch % 200 == 0:
+    if epoch % 10 == 0:
         saver.save(sess, model_path + 'model', global_step=epoch)
+
+    if epoch != 0 and epoch % 150 == 0:
         learning_rate_val *= 0.99
         print "cur_learning_rate:", learning_rate_val
 
